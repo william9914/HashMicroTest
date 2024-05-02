@@ -1,6 +1,6 @@
 # mobile_attendance
 
-A new Flutter project.
+Attendance Apps Mock
 
 ## Getting Started
 
