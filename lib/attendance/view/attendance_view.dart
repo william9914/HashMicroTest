@@ -160,94 +160,94 @@ class _AttendanceViewState extends State<AttendanceView> {
       appBar: AppBar(
         title: Text('Geo Tag Attendance'),
       ),
-      body: Column(
-        children: [
-          Container(
-            height: 400,
-            child: GoogleMap(
-              gestureRecognizers: Set()
-                ..add(Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer())),
-              onMapCreated: _onMapCreated,
-              // myLocationButtonEnabled: true,
-              initialCameraPosition: CameraPosition(
-                target: initPosition,
-                zoom: 2,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              height: 400,
+              child: GoogleMap(
+                gestureRecognizers: Set()
+                  ..add(Factory<OneSequenceGestureRecognizer>(
+                      () => EagerGestureRecognizer())),
+                onMapCreated: _onMapCreated,
+                // myLocationButtonEnabled: true,
+                initialCameraPosition: CameraPosition(
+                  target: initPosition,
+                  zoom: 2,
+                ),
+                onCameraIdle: () async {
+                  // googleMapController.isMarkerInfoWindowShown(MarkerId('google_plex')).then((value) {
+                  //   googleMapController.showMarkerInfoWindow(MarkerId('google_plex'));
+                  // });
+                  var placemarks = await placemarkFromCoordinates(
+                      currentLatLng.latitude, currentLatLng.longitude);
+                  print('placemarks $placemarks');
+                  setState(() {
+                    address =
+                        "${placemarks[0].locality ?? placemarks[0].subAdministrativeArea}, ${placemarks.first.country} - ${placemarks.first.postalCode}";
+                    // AddMarker();
+                    fullAddress =
+                        "${placemarks[0].thoroughfare ?? placemarks[0].name}, ${placemarks[0].locality}, ${placemarks[0].subAdministrativeArea}, ${placemarks[0].administrativeArea}, ${placemarks.first.country}, ${placemarks.first.postalCode}";
+                    geoFencingCheckingCurrentLoc();
+                    geoFencingChecking();
+                  });
+                  if (placemarks.isNotEmpty) {
+                    Future.delayed(
+                        Duration.zero,
+                        () => googleMapController!.showMarkerInfoWindow(
+                              const MarkerId("location"),
+                            ));
+                    // googleMapController!.showMarkerInfoWindow(MarkerId("location"),);
+                  }
+                },
+                onCameraMove: onCameraChange,
+                myLocationButtonEnabled: true,
+                myLocationEnabled: true,
+                circles: Set.from(
+                  [
+                    Circle(
+                      circleId: CircleId('currentCircle'),
+                      center: LatLng(controller.initialLatitude,
+                          controller.initialLongitude),
+                      radius: 50,
+                      fillColor: Colors.blue.withOpacity(0.5),
+                      strokeColor: Colors.blue.withOpacity(0.1),
+                    ),
+                  ],
+                ),
+                markers: {
+                  Marker(
+                      icon: BitmapDescriptor.defaultMarker,
+                      markerId: const MarkerId('location'),
+                      position: currentLatLng,
+                      infoWindow: InfoWindow(
+                        title: address,
+                        // snippet: 'Enjoy',
+                      )),
+                },
               ),
-              onCameraIdle: () async {
-                // googleMapController.isMarkerInfoWindowShown(MarkerId('google_plex')).then((value) {
-                //   googleMapController.showMarkerInfoWindow(MarkerId('google_plex'));
-                // });
-                var placemarks = await placemarkFromCoordinates(
-                    currentLatLng.latitude, currentLatLng.longitude);
-                print('placemarks $placemarks');
-                setState(() {
-                  address =
-                      "${placemarks[0].locality ?? placemarks[0].subAdministrativeArea}, ${placemarks.first.country} - ${placemarks.first.postalCode}";
-                  // AddMarker();
-                  fullAddress =
-                      "${placemarks[0].thoroughfare ?? placemarks[0].name}, ${placemarks[0].locality}, ${placemarks[0].subAdministrativeArea}, ${placemarks[0].administrativeArea}, ${placemarks.first.country}, ${placemarks.first.postalCode}";
-                  geoFencingCheckingCurrentLoc();
-                  geoFencingChecking();
-                });
-                if (placemarks.isNotEmpty) {
-                  Future.delayed(
-                      Duration.zero,
-                      () => googleMapController!.showMarkerInfoWindow(
-                            const MarkerId("location"),
-                          ));
-                  // googleMapController!.showMarkerInfoWindow(MarkerId("location"),);
-                }
-              },
-              onCameraMove: onCameraChange,
-              myLocationButtonEnabled: true,
-              myLocationEnabled: true,
-              circles: Set.from(
-                [
-                  Circle(
-                    circleId: CircleId('currentCircle'),
-                    center: LatLng(controller.initialLatitude,
-                        controller.initialLongitude),
-                    radius: 50,
-                    fillColor: Colors.blue.withOpacity(0.5),
-                    strokeColor: Colors.blue.withOpacity(0.1),
-                  ),
-                ],
-              ),
-              markers: {
-                Marker(
-                    icon: BitmapDescriptor.defaultMarker,
-                    markerId: const MarkerId('location'),
-                    position: currentLatLng,
-                    infoWindow: InfoWindow(
-                      title: address,
-                      // snippet: 'Enjoy',
-                    )),
-              },
             ),
-          ),
-          Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: address == '' || address == null
-                  ? Text('')
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          address.toString(),
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          fullAddress,
-                          style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.normal),
-                        ),
-                      ],
-                    )),
-          Visibility(
-              visible: controller.listAttendance.length != 0,
-              child: SingleChildScrollView(
+            Container(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: address == '' || address == null
+                    ? Text('')
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            address.toString(),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            fullAddress,
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.normal),
+                          ),
+                        ],
+                      )),
+            Visibility(
+                visible: controller.listAttendance.length != 0,
                 child: Column(
                   children:
                       List.generate(controller.listAttendance.length, (index) {
@@ -256,7 +256,7 @@ class _AttendanceViewState extends State<AttendanceView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Clock In'),
+                          Text('Attend'),
                           Row(
                             children: [
                               Text(
@@ -280,9 +280,9 @@ class _AttendanceViewState extends State<AttendanceView> {
                       ),
                     );
                   }),
-                ),
-              )),
-        ],
+                )),
+          ],
+        ),
       ),
       bottomSheet: Padding(
           padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
